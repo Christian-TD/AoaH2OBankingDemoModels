@@ -1,7 +1,8 @@
 {
   "hyperParameters": {
-    "shrinkage": 0.01,
-    "cv.folds": 5,
-    "n.trees": 3000
+    "ntrees": 50,
+    "max_depth": 2,
+    "min_rows": 2,
+    "learn_rate": 0.1
   }
 }
