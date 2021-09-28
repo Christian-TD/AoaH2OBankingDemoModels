@@ -76,12 +76,21 @@ train <- function(data_conf, model_conf, ...) {
 
     # Save trained model
     print("Saving trained model...")
-    #saveRDS(model, "artifacts/output/model.rds")
-    
+
     # Save trained model in h2o format
     output.dir <- getwd()
     path.value <- file.path(output.dir, "artifacts/output")
     h2o.saveModel(object = model, path = path.value, force = TRUE)
     name <- file.path(path.value, "model.h2o") # destination file name at the same folder location
     file.rename(file.path(path.value, model@model_id), name)
+
+    # Save trained model as h2o mojo
+    mojo <- h2o.download_mojo(model, path=path.value, get_genmodel_jar=TRUE)
+    name <- file.path(path.value, "mojo.zip") # destination file name at the same folder location
+    file.rename(file.path(path.value, mojo), name)  
+
+    # Convert mojo to pmml
+    cmd <- sprintf("java -jar /opt/jpmml-h2o-executable-1.1-SNAPSHOT.jar --mojo-input %s --pmml-output %s", name, file.path(path.value, "model.pmml"))
+    result <- try(system(cmd, intern = TRUE))
+    print(result)
 }

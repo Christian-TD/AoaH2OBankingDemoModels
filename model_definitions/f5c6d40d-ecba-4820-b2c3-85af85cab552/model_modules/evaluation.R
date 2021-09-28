@@ -66,7 +66,6 @@ evaluate <- function(data_conf, model_conf, ...) {
     path.value <- file.path(output.dir, "artifacts/input")
     name <- file.path(path.value, "model.h2o")
     model <- h2o.loadModel(name)
-    print(model)
     
     print("Running evaluation of h2o model")
     pred <- h2o.predict(model, data)
