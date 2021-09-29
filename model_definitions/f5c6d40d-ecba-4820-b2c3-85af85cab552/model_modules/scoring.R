@@ -35,7 +35,10 @@ score.restful <- function(model, data, ...) {
     print("Scoring model...")
     data_df <- as.h2o(data)
     score <- h2o.predict(model, data_df)
-    score
+    print(score)
+    score_df <- as.data.frame(score$predict)
+    print(score_df)
+    score_df
 }
 
 score.batch <- function(data_conf, model_conf, model_version, ...) {
