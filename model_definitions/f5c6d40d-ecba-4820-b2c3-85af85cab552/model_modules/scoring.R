@@ -33,6 +33,15 @@ initialise_model <- function() {
 
 score.restful <- function(model, data, ...) {
     print("Scoring model...")
+    data$age <- as.integer(data$age)
+    data$job <- as.factor(data$job)
+    data$marital <- as.factor(data$marital)
+    data$education <- as.factor(data$education)
+    data$default <- as.factor(data$default)
+    data$balance <- as.integer(data$balance)
+    data$housing <- as.factor(data$housing)
+    data$loan <- as.factor(data$loan)
+    data$y <- as.factor(data$y)
     data_df <- as.h2o(data)
     score <- h2o.predict(model, data_df)
     print(score)
@@ -73,7 +82,6 @@ score.batch <- function(data_conf, model_conf, model_version, ...) {
     data$housing <- as.factor(data$housing)
     data$loan <- as.factor(data$loan)
     data$y <- as.factor(data$y)
-    data
     
     # Convert dataframe to h2o
     score.hex <- as.h2o(data)
