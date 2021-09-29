@@ -33,6 +33,7 @@ initialise_model <- function() {
 
 score.restful <- function(model, data, ...) {
     print("Scoring model...")
+    
     data$age <- as.integer(data$age)
     data$job <- as.factor(data$job)
     data$marital <- as.factor(data$marital)
@@ -41,11 +42,11 @@ score.restful <- function(model, data, ...) {
     data$balance <- as.integer(data$balance)
     data$housing <- as.factor(data$housing)
     data$loan <- as.factor(data$loan)
-    data$y <- as.factor(data$y)
+    
     data_df <- as.h2o(data)
     score <- h2o.predict(model, data_df)
     print(score)
-    score_df <- as.data.frame(score$predict)
+    score_df <- as.data.frame(score)
     print(score_df)
     score_df
 }
