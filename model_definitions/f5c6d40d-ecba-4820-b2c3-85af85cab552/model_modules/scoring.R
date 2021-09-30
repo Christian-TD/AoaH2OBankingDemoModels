@@ -45,9 +45,7 @@ score.restful <- function(model, data, ...) {
     
     data_df <- as.h2o(data)
     score <- h2o.predict(model, data_df)
-    print(score)
     score_df <- as.data.frame(score)
-    print(score_df)
     score_df
 }
 
