@@ -52,7 +52,7 @@ Evaluation is performed in [evaluation.R](model_modules/evaluation.R) by the fun
 The [scoring.R](model_modules/scoring.R) loads the model and metadata and accepts the dataframe for prediction.
 
 ### Batch mode
-In this example, the values to score are in the table 'PIMA_TEST' at Teradata Vantage. The results are saved in the table 'PIMA_PREDICTIONS'. When batch deploying, this custom values should be specified:
+In this example, the values to score are in the table 'bank_marketing_data' at Teradata Vantage. The results are saved in the table 'bank_marketing_data_predictions'. When batch deploying, this custom values should be specified:
    
    | key | value |
    |----------|-------------|
