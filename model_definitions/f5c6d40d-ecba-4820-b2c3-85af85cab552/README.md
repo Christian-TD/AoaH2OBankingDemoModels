@@ -1,4 +1,4 @@
-# R Bank Marketing with H2O
+# Bank Marketing in R with H2O
 ## Overview
 Bank Marketing demo model using H2O in R
 
@@ -24,7 +24,7 @@ Batch Scoring
 ```json
  {
      "table": "<score dataset>",
-     "predictions": "<ouput predictions dataset>"
+     "predictions": "<output predictions dataset>"
  }
  ```
 
@@ -69,7 +69,7 @@ In this example, the values to score are in the table 'bank_marketing_data' at T
                             35,
                             "blue-collar",
                             "married",
-                            "tertiary",
+                            "primary",
                             "no",
                             5883,
                             "yes",
