@@ -7,7 +7,6 @@ import os
 import json
 import h2o
 import pandas as pd
-from h2o.automl import H2OAutoML
 
 
 def evaluate(data_conf, model_conf, **kwargs):
