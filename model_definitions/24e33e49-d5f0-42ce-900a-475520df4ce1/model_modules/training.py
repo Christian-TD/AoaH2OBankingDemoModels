@@ -38,7 +38,7 @@ def train(data_conf, model_conf, **kwargs):
 
     # Here we are getting the best GBM algorithm for demo purposes
     model = aml.get_best_model(algorithm="gbm")
-    if !model:
+    if not model:
         model = aml.leader
 
     print("Finished training")
