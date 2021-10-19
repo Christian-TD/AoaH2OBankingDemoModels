@@ -35,9 +35,11 @@ def train(data_conf, model_conf, **kwargs):
     # Execute AutoML on training data
     aml = H2OAutoML(max_models=hyperparams['max_models'], seed=hyperparams['seed'])
     aml.train(x=feature_names, y=target_name, training_frame=X_train)
-    # model = aml.leader
+
     # Here we are getting the best GBM algorithm for demo purposes
     model = aml.get_best_model(algorithm="gbm")
+    if !model:
+        model = aml.leader
 
     print("Finished training")
 
