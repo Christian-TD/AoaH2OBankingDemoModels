@@ -20,19 +20,22 @@ def score(data_conf, model_conf, **kwargs):
                    password=os.environ["AOA_CONN_PASSWORD"],
                    database=data_conf["schema"] if "schema" in data_conf and data_conf["schema"] != "" else None)
 
+    feature_names = ['age', 'job', 'marital', 'education', 'default', 'balance', 'housing', 'loan']
+    target_name = 'y'
+
     # read scoring dataset from Teradata and convert to pandas
     features_tdf = DataFrame(data_conf["table"])
-    features_tdf = features_tdf.select([model.feature_names])
+    features_tdf = features_tdf.select([feature_names])
     features_hdf = h2o.H2OFrame(features_tdf.to_pandas())
 
     print("Scoring")
     y_pred = model.predict(features_hdf)
-    y_pred_pd = y_pred.to_pandas()
+    y_pred_pd = y_pred.as_data_frame()
 
     print("Finished Scoring")
 
     # create result dataframe and store in Teradata
-    y_pred_pd = pd.DataFrame(y_pred_pd['predict'], columns=[model.target_name])
+    y_pred_pd = pd.DataFrame(y_pred_pd['predict'], columns=[target_name])
     copy_to_sql(df=y_pred_pd, table_name=data_conf["predictions"], index=False, if_exists="replace")
 
     predictions_tdf = DataFrame(data_conf["predictions"])
@@ -54,11 +57,11 @@ class ModelScorer(object):
                                           'Model Prediction Classes', ['model', 'version', 'clazz'])
 
     def predict(self, data):
-        pred = self.model.predict([data])
+        pred = self.model.predict(h2o.H2OFrame([data]))
 
         # record the predicted class so we can check model drift (via class distributions)
         self.pred_class_counter.labels(model=os.environ["MODEL_NAME"],
                                        version=os.environ.get("MODEL_VERSION", "1.0"),
                                        clazz=str(int(pred))).inc()
 
-        return pred
+        return pred.as_data_frame()

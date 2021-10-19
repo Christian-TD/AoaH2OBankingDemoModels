@@ -20,23 +20,29 @@ def evaluate(data_conf, model_conf, **kwargs):
                    password=os.environ["AOA_CONN_PASSWORD"],
                    database=data_conf["schema"] if "schema" in data_conf and data_conf["schema"] != "" else None)
 
-    
+
+    feature_names = ['age', 'job', 'marital', 'education', 'default', 'balance', 'housing', 'loan']
+    target_name = 'y'
+
     # read training dataset from Teradata and convert to pandas
+    #test_df = DataFrame(data_conf["table"]).sample(frac=0.7) # this is throwing errors
     test_df = DataFrame(data_conf["table"])
-    test_df = test_df.select([model.feature_names + [model.target_name]])
-    test_hdf = h2o.H2OFrame(test_df.to_pandas())
+    test_tdf = test_df.select([feature_names + [target_name]])
+    test_pdf = test_tdf.to_pandas()
+    test_hdf = h2o.H2OFrame(test_pdf)
 
     # split data into X and y and factorize
-    X_test, y_test = test_hdf.split_frame(ratios=[.7])
+    X_test = test_hdf
     y_test = X_test
-    y_test[model.target_name] = y_test[model.target_name].asfactor()
-    X_test = X_test[model.feature_names]
+    y_test[target_name] = y_test[target_name].asfactor()
+    X_test = X_test[feature_names]
 
     print("Scoring")
     y_pred = model.predict(X_test)
-    y_pred_pd = y_pred.to_pandas()
-
-    y_pred_tdf = pd.DataFrame(y_pred_pd['predict'], columns=[model.target_name])
+    y_pred_pd = y_pred.as_data_frame()
+    y_pred_tdf = y_pred_pd['predict']
+    y_pred_tdf = pd.DataFrame(y_pred_tdf, columns=['predict'])
+    y_pred_tdf = y_pred_tdf.rename(columns={'predict': 'y'})
 
     eval_metrics=model.model_performance(y_test)
     evaluation = {
@@ -60,6 +66,7 @@ def evaluate(data_conf, model_conf, **kwargs):
     with open(os.path.join(current_path, artifacts_path, 'metrics.json'), "w+") as f:
         json.dump(evaluation, f)
 
+    import matplotlib.pyplot as plt
     roc_plot = eval_metrics.plot(type = "roc")
     plt.savefig(os.path.join(current_path, artifacts_path, 'roc_curve.png'))
 
@@ -69,7 +76,6 @@ def evaluate(data_conf, model_conf, **kwargs):
     lc_plot = model.learning_curve_plot()
     plt.savefig(os.path.join(current_path, artifacts_path, 'learning_curve.png'))
     
-    import matplotlib.pyplot as plt
     try:
         vi_plot = model.varimp_plot()
         plt.savefig(os.path.join(current_path, artifacts_path, 'feature_importance.png'))
@@ -88,4 +94,6 @@ def evaluate(data_conf, model_conf, **kwargs):
     predictions_table = "{}_tmp".format(data_conf["predictions"]).lower()
     copy_to_sql(df=y_pred_tdf, table_name=predictions_table, index=False, if_exists="replace", temporary=True)
 
-    stats.record_evaluation_stats(test_df, DataFrame(predictions_table), feature_importance)
+    print(test_df)
+    print(y_pred_tdf)
+    stats.record_evaluation_stats(test_df.select([feature_names]), DataFrame(predictions_table), feature_importance)
