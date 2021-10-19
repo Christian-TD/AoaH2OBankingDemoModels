@@ -38,9 +38,6 @@ def train(data_conf, model_conf, **kwargs):
     # model = aml.leader
     # Here we are getting the best GBM algorithm for demo purposes
     model = aml.get_best_model(algorithm="gbm")
-    model.feature_names = feature_names
-    model.target_name = target_name
-    model.categorical_names = categorical_names
 
     print("Finished training")
 
