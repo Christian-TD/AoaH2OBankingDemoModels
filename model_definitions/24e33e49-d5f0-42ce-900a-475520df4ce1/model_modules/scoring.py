@@ -61,12 +61,8 @@ class ModelScorer(object):
                                           'Model Prediction Classes', ['model', 'version', 'clazz'])
 
     def predict(self, data):
-        print(data)
-        print(type(data))
-        print(h2o.H2OFrame([data]))
         feature_names = ['age', 'job', 'marital', 'education', 'default', 'balance', 'housing', 'loan']
-        data_df = pd.DataFrame(data=data, columns=feature_names)
-        print(data_df)
+        data_df = pd.DataFrame(data=[data], columns=feature_names)
         pred = self.model.predict(h2o.H2OFrame(data_df))
 
         # record the predicted class so we can check model drift (via class distributions)

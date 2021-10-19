@@ -49,7 +49,7 @@ Evaluation is performed in [evaluation.py](model_modules/evaluation.py) by the f
     McnemarPValue: <mcn_pval>
 
 ## Scoring
-The [scoring.R](model_modules/scoring.py) loads the model and metadata and accepts the dataframe for prediction.
+The [scoring.py](model_modules/scoring.py) loads the model and metadata and accepts the dataframe for prediction.
 
 ### Batch mode
 In this example, the values to score are in the table 'bank_marketing_data' at Teradata Vantage. The results are saved in the table 'bank_marketing_data_predictions'. When batch deploying, this custom values should be specified:
@@ -65,7 +65,7 @@ In this example, the values to score are in the table 'bank_marketing_data' at T
             -H "Content-Type: application/json" \
             -d '{
                 "data": {
-                    "ndarray": [[
+                    "ndarray": [
                             35,
                             "blue-collar",
                             "married",
@@ -74,16 +74,6 @@ In this example, the values to score are in the table 'bank_marketing_data' at T
                             5883,
                             "yes",
                             "yes"
-                    ]],
-                    "names":[
-                        "age", 
-                        "job", 
-                        "marital", 
-                        "education", 
-                        "default", 
-                        "balance", 
-                        "housing", 
-                        "loan"
                     ]
                 }
             }' 
