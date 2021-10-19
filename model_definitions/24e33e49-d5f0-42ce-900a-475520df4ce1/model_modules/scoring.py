@@ -61,7 +61,10 @@ class ModelScorer(object):
                                           'Model Prediction Classes', ['model', 'version', 'clazz'])
 
     def predict(self, data):
-        pred = self.model.predict(h2o.H2OFrame([data]))
+        print(data)
+        print(type(data))
+        print(h2o.H2OFrame([data]))
+        pred = self.model.predict(h2o.H2OFrame(data))
 
         # record the predicted class so we can check model drift (via class distributions)
         self.pred_class_counter.labels(model=os.environ["MODEL_NAME"],
