@@ -35,8 +35,12 @@ def score(data_conf, model_conf, **kwargs):
     print("Finished Scoring")
 
     # create result dataframe and store in Teradata
-    y_pred_pd = pd.DataFrame(y_pred_pd['predict'], columns=[target_name])
-    copy_to_sql(df=y_pred_pd, table_name=data_conf["predictions"], index=False, if_exists="replace")
+    #y_pred_pd = pd.DataFrame(y_pred_pd['predict'], columns=[target_name])
+    y_pred_pd = y_pred.as_data_frame()
+    y_pred_tdf = y_pred_pd['predict']
+    y_pred_tdf = pd.DataFrame(y_pred_tdf, columns=['predict'])
+    y_pred_tdf = y_pred_tdf.rename(columns={'predict': target_name})
+    copy_to_sql(df=y_pred_tdf, table_name=data_conf["predictions"], index=False, if_exists="replace")
 
     predictions_tdf = DataFrame(data_conf["predictions"])
 

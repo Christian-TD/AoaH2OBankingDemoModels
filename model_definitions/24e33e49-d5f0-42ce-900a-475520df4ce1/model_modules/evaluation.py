@@ -94,6 +94,4 @@ def evaluate(data_conf, model_conf, **kwargs):
     predictions_table = "{}_tmp".format(data_conf["predictions"]).lower()
     copy_to_sql(df=y_pred_tdf, table_name=predictions_table, index=False, if_exists="replace", temporary=True)
 
-    print(test_df)
-    print(y_pred_tdf)
     stats.record_evaluation_stats(test_df.select([feature_names]), DataFrame(predictions_table), feature_importance)
