@@ -3,6 +3,8 @@ from teradataml.dataframe.dataframe import DataFrame
 from teradataml.dataframe.copy_to import copy_to_sql
 from aoa.stats import stats
 from aoa.util.artefacts import save_plot
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
 import os
 import json
 import h2o
@@ -73,6 +75,23 @@ def evaluate(data_conf, model_conf, **kwargs):
 
     model.learning_curve_plot()
     save_plot('learning_curve.png')
+
+    cm = confusion_matrix(y_test.as_data_frame()['y'].values, y_pred_tdf.values)
+    labels = ['no', 'yes']
+    values = [0,1]
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    cax = ax.matshow(cm)
+    plt.title('Confusion Matrix')
+    fig.colorbar(cax)
+    ax.set_xticks(values)
+    ax.set_xticklabels(labels)
+    ax.set_yticks(values)
+    ax.set_yticklabels(labels)
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
+    plt.show()
+    save_plot('confusion_matrix.png')
 
     try:
         model.varimp_plot()

@@ -32,7 +32,7 @@ Batch Scoring
 ## Training
 The [training.py](model_modules/training.py) produces the following artifacts
 
-- model.h20        (h2o gbm parameters)
+- model.h20        (h2o trained model binary)
 - model.pmml       (pmml version of the trained model)
 - mojo.zip         (h2o mojo version of the trained model)
 - h2o-genmodel.jar (jar file with some libraries required for the mojo file when deployed in production)
@@ -40,13 +40,19 @@ The [training.py](model_modules/training.py) produces the following artifacts
 ## Evaluation
 Evaluation is performed in [evaluation.py](model_modules/evaluation.py) by the function `evaluate` and it returns the following metrics
 
-    Accuracy: <acc>
-    Kappa: <kappa>
-    AccuracyLower: <acc_low>
-    AccuracyUpper: <acc_upp>
-    AccuracyNull: <acc_null>
-    AccuracyPValue: <acc_pval>
-    McnemarPValue: <mcn_pval>
+    Gini: <gini>
+    MSE: <mse>
+    RMSE: <rmse>
+    LogLoss: <logloss>
+    AUC: <auc>
+    AUCPR: <aucpr>
+    Accuracy: <accuracy>
+    Mean Per-Class Error: <mpce>
+    F1 score: <f1>
+    Precision: <precision>
+    Sensitivity: <sensitivity>
+    Specificity: <specificity>
+    Recall: <recall>
 
 ## Scoring
 The [scoring.py](model_modules/scoring.py) loads the model and metadata and accepts the dataframe for prediction.
