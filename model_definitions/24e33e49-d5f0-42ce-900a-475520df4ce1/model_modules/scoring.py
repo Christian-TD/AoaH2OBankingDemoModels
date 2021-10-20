@@ -35,7 +35,6 @@ def score(data_conf, model_conf, **kwargs):
     print("Finished Scoring")
 
     # create result dataframe and store in Teradata
-    #y_pred_pd = pd.DataFrame(y_pred_pd['predict'], columns=[target_name])
     y_pred_pd = y_pred.as_data_frame()
     y_pred_tdf = y_pred_pd['predict']
     y_pred_tdf = pd.DataFrame(y_pred_tdf, columns=['predict'])
@@ -57,24 +56,23 @@ class ModelScorer(object):
         h2o.init()
         self.model = h2o.load_model(os.path.join(current_path, input_path, 'model.h2o'))
         
-        print("The RESTful model ready to accept requests.")
+        print("The RESTful model is ready to accept requests.")
 
         from prometheus_client import Counter
         self.pred_class_counter = Counter('model_prediction_classes',
                                           'Model Prediction Classes', ['model', 'version', 'clazz'])
 
     def predict(self, data):
+        print("Prediction request received with data: ")
         print(data)
         feature_names = ['age', 'job', 'marital', 'education', 'default', 'balance', 'housing', 'loan']
         data_df = pd.DataFrame(data=[data], columns=feature_names)
-        print(data_df)
         data_h2o = h2o.H2OFrame(data_df)
-        print(data_h2o)
-        pred = self.model.predict(data_h2o)
+        pred = self.model.predict(data_h2o).as_data_frame()
 
         # record the predicted class so we can check model drift (via class distributions)
         self.pred_class_counter.labels(model=os.environ["MODEL_NAME"],
                                        version=os.environ.get("MODEL_VERSION", "1.0"),
-                                       clazz=str(int(pred))).inc()
+                                       clazz=str(int(1 if pred['predict'] == 'yes' else 0)).inc()
 
-        return pred.as_data_frame()
+        return pred
