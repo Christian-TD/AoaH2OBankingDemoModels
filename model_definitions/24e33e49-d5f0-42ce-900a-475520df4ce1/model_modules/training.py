@@ -65,18 +65,17 @@ def train(data_conf, model_conf, **kwargs):
 
     print("Saved trained model")
 
-    import matplotlib.pyplot as plt
     try:
-        ra_plot = model.varimp_plot()
-        plt.savefig(os.path.join(current_path, artifacts_path, 'feature_importance.png'))
+        model.varimp_plot()
+        save_plot('feature_importance.png')
         fi = model.varimp(True)
         fix = fi[['variable','scaled_importance']]
         fis = fix.to_dict('records')
         feature_importance = {v['variable']:v['scaled_importance'] for (k,v) in enumerate(fis)}
     except:
         print("Warning: This model doesn't have variable importances (Stacked Ensemble)")
-        ra_plot = aml.varimp_heatmap()
-        plt.savefig(os.path.join(current_path, artifacts_path, 'feature_heatmap.png'))
+        aml.varimp_heatmap()
+        save_plot('feature_heatmap.png')
         feature_importance = {}
 
     stats.record_training_stats(train_df,

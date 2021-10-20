@@ -20,19 +20,18 @@ def evaluate(data_conf, model_conf, **kwargs):
                    password=os.environ["AOA_CONN_PASSWORD"],
                    database=data_conf["schema"] if "schema" in data_conf and data_conf["schema"] != "" else None)
 
-
     feature_names = ['age', 'job', 'marital', 'education', 'default', 'balance', 'housing', 'loan']
     target_name = 'y'
 
     # read training dataset from Teradata and convert to pandas
-    #test_df = DataFrame(data_conf["table"]).sample(frac=0.7) # this is throwing errors
+    # test_df = DataFrame(data_conf["table"]).sample(frac=0.7) # this is throwing errors
     test_df = DataFrame(data_conf["table"])
     test_tdf = test_df.select([feature_names + [target_name]])
     test_pdf = test_tdf.to_pandas()
     test_hdf = h2o.H2OFrame(test_pdf)
 
     # split data into X and y and factorize
-    X_test = test_hdf
+    X_test, y_test = test_hdf.split_frame(ratios=[.7])
     y_test = X_test
     y_test[target_name] = y_test[target_name].asfactor()
     X_test = X_test[feature_names]
@@ -44,7 +43,7 @@ def evaluate(data_conf, model_conf, **kwargs):
     y_pred_tdf = pd.DataFrame(y_pred_tdf, columns=['predict'])
     y_pred_tdf = y_pred_tdf.rename(columns={'predict': 'y'})
 
-    eval_metrics=model.model_performance(y_test)
+    eval_metrics = model.model_performance(y_test)
     evaluation = {
         'Gini': '{:.6f}'.format(eval_metrics.gini()),
         'MSE': '{:.6f}'.format(eval_metrics.mse()),
@@ -62,33 +61,32 @@ def evaluate(data_conf, model_conf, **kwargs):
     }
 
     artifacts_path = "artifacts/output"
-    
+
     with open(os.path.join(current_path, artifacts_path, 'metrics.json'), "w+") as f:
         json.dump(evaluation, f)
 
-    import matplotlib.pyplot as plt
-    roc_plot = eval_metrics.plot(type = "roc")
-    plt.savefig(os.path.join(current_path, artifacts_path, 'roc_curve.png'))
+    eval_metrics.plot(type="roc")
+    save_plot('roc_curve.png')
 
-    pr_plot = eval_metrics.plot(type = "pr")
-    plt.savefig(os.path.join(current_path, artifacts_path, 'aucpr.png'))
-    
-    lc_plot = model.learning_curve_plot()
-    plt.savefig(os.path.join(current_path, artifacts_path, 'learning_curve.png'))
-    
+    eval_metrics.plot(type="pr")
+    save_plot('aucpr.png')
+
+    model.learning_curve_plot()
+    save_plot('learning_curve.png')
+
     try:
-        vi_plot = model.varimp_plot()
-        plt.savefig(os.path.join(current_path, artifacts_path, 'feature_importance.png'))
-        shap_plot = model.shap_summary_plot(y_test)
-        plt.savefig(os.path.join(current_path, artifacts_path, 'shap_summary.png'))
-        shapr_plot = model.shap_explain_row_plot(y_test, row_index=0)
-        plt.savefig(os.path.join(current_path, artifacts_path, 'shap_explain.png'))
+        model.varimp_plot()
+        save_plot('feature_importance.png')
+        model.shap_summary_plot(y_test)
+        save_plot('shap_summary.png')
+        model.shap_explain_row_plot(y_test, row_index=0)
+        save_plot('shap_explain_row.png')
         fi = model.varimp(True)
-        fix = fi[['variable','scaled_importance']]
+        fix = fi[['variable', 'scaled_importance']]
         fis = fix.to_dict('records')
-        feature_importance = {v['variable']:v['scaled_importance'] for (k,v) in enumerate(fis)}
+        feature_importance = {v['variable']: v['scaled_importance'] for (k, v) in enumerate(fis)}
     except:
-        print("Warning: This model doesn't have variable importances (Stacked Ensemble)")
+        print("Warning: This model doesn't support feature importance (Stacked Ensemble)")
         feature_importance = {}
 
     print(data_conf)

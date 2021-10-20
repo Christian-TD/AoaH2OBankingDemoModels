@@ -1,6 +1,6 @@
-# Bank Marketing in python with H2O
+# Bank Marketing in python with H2O AutoML
 ## Overview
-Bank Marketing demo model using H2O in python
+Bank Marketing demo model using H2O AutoML in python
 
 ## Datasets
 The dataset required to train or evaluate this model comes from the UCI Machine Learning repository available [here](https://archive.ics.uci.edu/ml/datasets/bank+marketing).
