@@ -16,7 +16,8 @@ Evaluation
 
 ```json
 {
-    "table": "<test dataset>"
+    "table": "<test dataset>",
+    "predictions": "<output predictions dataset>"
 }
 ```
 
@@ -33,7 +34,6 @@ Batch Scoring
 The [training.py](model_modules/training.py) produces the following artifacts
 
 - model.h20        (h2o trained model binary)
-- model.pmml       (pmml version of the trained model)
 - mojo.zip         (h2o mojo version of the trained model)
 - h2o-genmodel.jar (jar file with some libraries required for the mojo file when deployed in production)
 

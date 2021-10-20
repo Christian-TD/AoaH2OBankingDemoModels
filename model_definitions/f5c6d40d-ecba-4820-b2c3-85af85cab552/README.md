@@ -1,6 +1,6 @@
-# Bank Marketing in R with H2O
+# Bank Marketing in R with H2O GBM
 ## Overview
-Bank Marketing demo model using H2O in R
+Bank Marketing demo model using H2O GBM in R
 
 ## Datasets
 The dataset required to train or evaluate this model comes from the UCI Machine Learning repository available [here](https://archive.ics.uci.edu/ml/datasets/bank+marketing).
