@@ -51,10 +51,13 @@ def score(data_conf, model_conf, **kwargs):
 class ModelScorer(object):
 
     def __init__(self, config=None):
+        print("Initializing RESTful Model...")
         current_path = os.path.abspath(os.getcwd())
         input_path = "artifacts/input"
         h2o.init()
         self.model = h2o.load_model(os.path.join(current_path, input_path, 'model.h2o'))
+        
+        print("The RESTful model ready to accept requests.")
 
         from prometheus_client import Counter
         self.pred_class_counter = Counter('model_prediction_classes',
