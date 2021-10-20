@@ -26,7 +26,6 @@ def evaluate(data_conf, model_conf, **kwargs):
     target_name = 'y'
 
     # read training dataset from Teradata and convert to pandas
-    # test_df = DataFrame(data_conf["table"]).sample(frac=0.7) # this is throwing errors
     test_df = DataFrame(data_conf["table"])
     test_tdf = test_df.select([feature_names + [target_name]])
     test_pdf = test_tdf.to_pandas()
@@ -113,4 +112,4 @@ def evaluate(data_conf, model_conf, **kwargs):
     predictions_table = "{}_tmp".format(data_conf["predictions"]).lower()
     copy_to_sql(df=y_pred_tdf, table_name=predictions_table, index=False, if_exists="replace", temporary=True)
 
-    stats.record_evaluation_stats(test_df.select([feature_names]), DataFrame(predictions_table), feature_importance)
+    stats.record_evaluation_stats(X_test.as_data_frame(), DataFrame(predictions_table), feature_importance)
