@@ -68,11 +68,11 @@ class ModelScorer(object):
         feature_names = ['age', 'job', 'marital', 'education', 'default', 'balance', 'housing', 'loan']
         data_df = pd.DataFrame(data=[data], columns=feature_names)
         data_h2o = h2o.H2OFrame(data_df)
-        pred = self.model.predict(data_h2o).as_data_frame()
+        pred = self.model.predict(data_h2o)
 
         # record the predicted class so we can check model drift (via class distributions)
         self.pred_class_counter.labels(model=os.environ["MODEL_NAME"],
                                        version=os.environ.get("MODEL_VERSION", "1.0"),
                                        clazz=str(int(1 if pred['predict'] == 'yes' else 0)).inc()
 
-        return pred
+        return pred.as_data_frame()
