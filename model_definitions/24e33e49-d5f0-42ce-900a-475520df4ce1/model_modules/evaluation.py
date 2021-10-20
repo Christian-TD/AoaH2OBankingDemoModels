@@ -107,11 +107,8 @@ def evaluate(data_conf, model_conf, **kwargs):
         print("Warning: This model doesn't support feature importance (Stacked Ensemble)")
         feature_importance = {}
 
-    print(data_conf)
     data_conf["predictions"] = 'bank_marketing_data_predictions'
     predictions_table = "{}_tmp".format(data_conf["predictions"]).lower()
     copy_to_sql(df=y_pred_tdf, table_name=predictions_table, index=False, if_exists="replace", temporary=True)
-    print(len(y_pred_tdf))
-    print(len(X_test))
 
-    stats.record_evaluation_stats(X_test.as_data_frame()[:len(y_pred_tdf)], DataFrame(predictions_table), feature_importance)
+    stats.record_evaluation_stats(test_tdf.iloc[:len(y_pred_tdf)], DataFrame(predictions_table), feature_importance)
