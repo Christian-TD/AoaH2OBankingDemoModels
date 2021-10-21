@@ -58,6 +58,12 @@ def train(data_conf, model_conf, **kwargs):
         # Rename the file
         os.rename(mojo, new_mojo)
 
+    # Convert mojo to pmml
+    cmd = "wget https://aoa-public-files.s3.amazonaws.com/jpmml-h2o-executable-1.1-SNAPSHOT.jar && java -jar ./jpmml-h2o-executable-1.1-SNAPSHOT.jar --mojo-input {} --pmml-output {}".format(new_mojo, os.path.join(current_path, artifacts_path, "model.pmml"))
+    result = os.system(cmd)
+    if result > 0:
+        raise OSError(result, "Error while trying to convert mojo to pmml")
+    
     print("Saved trained model")
 
     model.varimp_plot()

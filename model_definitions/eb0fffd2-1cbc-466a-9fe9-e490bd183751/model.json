@@ -2,5 +2,26 @@
     "id": "eb0fffd2-1cbc-466a-9fe9-e490bd183751",
     "name": "Bank Marketing in python with H2O GBM",
     "description": "Bank Marketing example model in python using h2o GBM libraries.",
-    "language": "python"
+    "language": "python",
+    "automation": {
+        "training": {
+            "resources": {
+                "cpu": "500m",
+                "memory": "500Mi"
+            }
+        },
+        "evaluation": {
+            "resources": {
+                "cpu": "500m",
+                "memory": "1Gi"
+            }
+        },
+        "deployment": {
+            "resources": {
+                "cpu": "500m",
+                "memory": "500Mi"
+            }
+        }
+    }
+
 }
