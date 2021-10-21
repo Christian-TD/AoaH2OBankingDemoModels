@@ -7,13 +7,13 @@
         "training": {
             "resources": {
                 "cpu": "500m",
-                "memory": "500Mi"
+                "memory": "1Gi"
             }
         },
         "evaluation": {
             "resources": {
                 "cpu": "500m",
-                "memory": "1Gi"
+                "memory": "1200Mi"
             }
         },
         "deployment": {
@@ -23,5 +23,4 @@
             }
         }
     }
-
 }
