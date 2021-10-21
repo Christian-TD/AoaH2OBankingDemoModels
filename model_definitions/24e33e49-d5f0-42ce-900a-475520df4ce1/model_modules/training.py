@@ -73,7 +73,7 @@ def train(data_conf, model_conf, **kwargs):
         fis = fix.to_dict('records')
         feature_importance = {v['variable']:v['scaled_importance'] for (k,v) in enumerate(fis)}
     except:
-        print("Warning: This model doesn't have variable importances (Stacked Ensemble)")
+        print("Warning: This model doesn't support feature importance (Stacked Ensemble)")
         aml.varimp_heatmap()
         save_plot('feature_heatmap.png')
         feature_importance = {}
