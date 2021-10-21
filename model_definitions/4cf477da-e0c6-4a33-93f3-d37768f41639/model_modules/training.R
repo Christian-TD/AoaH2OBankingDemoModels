@@ -91,9 +91,5 @@ train <- function(data_conf, model_conf, ...) {
     name <- file.path(path.value, "mojo.zip") # destination file name at the same folder location
     file.rename(file.path(path.value, mojo), name)  
 
-    # Convert mojo to pmml -> AutoML cannot be converted to PMML
-    #cmd <- sprintf("wget https://aoa-public-files.s3.amazonaws.com/jpmml-h2o-executable-1.1-SNAPSHOT.jar && java -jar ./jpmml-h2o-executable-1.1-SNAPSHOT.jar --mojo-input %s --pmml-output %s", name, file.path(path.value, "model.pmml"))
-    #result <- try(system(cmd, intern = TRUE))
-    #print(result)
     print("Trained model saved")
 }

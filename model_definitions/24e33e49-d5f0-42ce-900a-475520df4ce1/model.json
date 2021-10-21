@@ -2,5 +2,25 @@
     "id": "24e33e49-d5f0-42ce-900a-475520df4ce1",
     "name": "Bank Marketing in python with H2O AutoML",
     "description": "Bank Marketing example model in python using h2o AutoML libraries.",
-    "language": "python"
+    "language": "python",
+    "automation": {
+        "training": {
+            "resources": {
+                "cpu": "500m",
+                "memory": "1Gi"
+            }
+        },
+        "evaluation": {
+            "resources": {
+                "cpu": "500m",
+                "memory": "1200Mi"
+            }
+        },
+        "deployment": {
+            "resources": {
+                "cpu": "500m",
+                "memory": "500Mi"
+            }
+        }
+    }
 }

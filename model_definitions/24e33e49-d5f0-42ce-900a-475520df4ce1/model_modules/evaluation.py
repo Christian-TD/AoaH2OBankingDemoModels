@@ -106,6 +106,8 @@ def evaluate(data_conf, model_conf, **kwargs):
     except:
         print("Warning: This model doesn't support feature importance (Stacked Ensemble)")
         feature_importance = {}
+        model.residual_analysis_plot(y_test)
+        save_plot('residual_analysis.png')
 
     predictions_table = "{}_tmp".format(data_conf["predictions"]).lower()
     copy_to_sql(df=y_pred_tdf, table_name=predictions_table, index=False, if_exists="replace", temporary=True)
