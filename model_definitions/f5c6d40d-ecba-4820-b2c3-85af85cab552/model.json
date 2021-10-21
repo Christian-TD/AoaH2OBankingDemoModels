@@ -2,5 +2,25 @@
     "id": "f5c6d40d-ecba-4820-b2c3-85af85cab552",
     "name": "Bank Marketing in R with H2O GBM",
     "description": "Bank Marketing example GBM model in R using h2o libraries.",
-    "language": "R"
+    "language": "R",
+    "automation": {
+        "training": {
+            "resources": {
+                "cpu": "1",
+                "memory": "1Gi"
+            }
+        },
+        "evaluation": {
+            "resources": {
+                "cpu": "500m",
+                "memory": "1Gi"
+            }
+        },
+        "deployment": {
+            "resources": {
+                "cpu": "500m",
+                "memory": "1200Mi"
+            }
+        }
+    }
 }
