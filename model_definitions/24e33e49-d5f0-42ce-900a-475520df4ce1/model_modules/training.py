@@ -67,7 +67,7 @@ def train(data_conf, model_conf, **kwargs):
 
     try:
         model.varimp_plot()
-        save_plot('feature_importance.png')
+        save_plot('Feature Importance')
         fi = model.varimp(True)
         fix = fi[['variable','scaled_importance']]
         fis = fix.to_dict('records')
@@ -75,7 +75,7 @@ def train(data_conf, model_conf, **kwargs):
     except:
         print("Warning: This model doesn't support feature importance (Stacked Ensemble)")
         aml.varimp_heatmap()
-        save_plot('feature_heatmap.png')
+        save_plot('Feature Heatmap')
         feature_importance = {}
 
     stats.record_training_stats(train_df,

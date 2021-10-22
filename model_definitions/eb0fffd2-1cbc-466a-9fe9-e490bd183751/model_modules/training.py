@@ -67,7 +67,7 @@ def train(data_conf, model_conf, **kwargs):
     print("Saved trained model")
 
     model.varimp_plot()
-    save_plot('feature_importance.png')
+    save_plot('Feature Importance')
     fi = model.varimp(True)
     fix = fi[['variable','scaled_importance']]
     fis = fix.to_dict('records')

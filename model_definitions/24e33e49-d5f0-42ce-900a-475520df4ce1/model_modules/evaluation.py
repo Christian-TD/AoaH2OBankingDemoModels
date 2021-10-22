@@ -66,14 +66,14 @@ def evaluate(data_conf, model_conf, **kwargs):
     with open(os.path.join(current_path, artifacts_path, 'metrics.json'), "w+") as f:
         json.dump(evaluation, f)
 
-    eval_metrics.plot(type="roc")
-    save_plot('roc_curve.png')
-
     eval_metrics.plot(type="pr")
-    save_plot('aucpr.png')
+    save_plot('AUC Precision Recall')
+
+    eval_metrics.plot(type="roc")
+    save_plot('ROC Curve')
 
     model.learning_curve_plot()
-    save_plot('learning_curve.png')
+    save_plot('Learning Curve')
 
     cm = confusion_matrix(y_test.as_data_frame()['y'].values, y_pred_tdf.values)
     labels = ['no', 'yes']
@@ -81,7 +81,6 @@ def evaluate(data_conf, model_conf, **kwargs):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     cax = ax.matshow(cm)
-    plt.title('Confusion Matrix')
     fig.colorbar(cax)
     ax.set_xticks(values)
     ax.set_xticklabels(labels)
@@ -90,15 +89,15 @@ def evaluate(data_conf, model_conf, **kwargs):
     plt.xlabel('Predicted')
     plt.ylabel('True')
     plt.show()
-    save_plot('confusion_matrix.png')
+    save_plot('Confusion Matrix')
 
     try:
         model.varimp_plot()
-        save_plot('feature_importance.png')
+        save_plot('Feature Importance')
         model.shap_summary_plot(y_test)
-        save_plot('shap_summary.png')
+        save_plot('SHAP Summary')
         model.shap_explain_row_plot(y_test, row_index=0)
-        save_plot('shap_explain_row.png')
+        save_plot('SHAP Explain Row')
         fi = model.varimp(True)
         fix = fi[['variable', 'scaled_importance']]
         fis = fix.to_dict('records')
@@ -107,7 +106,7 @@ def evaluate(data_conf, model_conf, **kwargs):
         print("Warning: This model doesn't support feature importance (Stacked Ensemble)")
         feature_importance = {}
         model.residual_analysis_plot(y_test)
-        save_plot('residual_analysis.png')
+        save_plot('Residual Analysis')
 
     predictions_table = "{}_tmp".format(data_conf["predictions"]).lower()
     copy_to_sql(df=y_pred_tdf, table_name=predictions_table, index=False, if_exists="replace", temporary=True)
