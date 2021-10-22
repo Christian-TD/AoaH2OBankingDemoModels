@@ -51,7 +51,6 @@ evaluate <- function(data_conf, model_conf, ...) {
     data$housing <- as.factor(data$housing)
     data$loan <- as.factor(data$loan)
     data$y <- as.factor(data$y)
-    data
     
     # Initialize and convert dataframe to h2o
     print("Init h2o")
