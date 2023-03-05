@@ -1,0 +1,27 @@
+{
+    "id": "742f4428-7508-46b0-8dd2-c7b5ceb0360d",
+    "name": "PIMA Diabetes H20 GBM",
+    "description": "Python H20 GBM for Diabetes Prediction",
+    "language": "python",
+    "automation": {
+        "training": {
+            "resources": {
+                "cpu": "500m",
+                "memory": "1Gi"
+            }
+        },
+        "evaluation": {
+            "resources": {
+                "cpu": "500m",
+                "memory": "1200Mi"
+            }
+        },
+        "deployment": {
+            "resources": {
+                "cpu": "500m",
+                "memory": "500Mi"
+            }
+        }
+    },
+    "source_model_id": "eb0fffd2-1cbc-466a-9fe9-e490bd183751"
+}
