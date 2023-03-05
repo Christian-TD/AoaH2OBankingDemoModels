@@ -1,7 +1,10 @@
-from teradataml import create_context
-from teradataml.dataframe.dataframe import DataFrame
-from aoa.stats import stats
-from aoa.util.artefacts import save_plot
+from teradataml import DataFrame
+from aoa import (
+    record_training_stats,
+    save_plot,
+    aoa_create_context,
+    ModelContext
+)
 import os
 import h2o
 from h2o.estimators.gbm import H2OGradientBoostingEstimator
@@ -12,29 +15,16 @@ def train(context: ModelContext, **kwargs):
 
     feature_names = context.dataset_info.feature_names
     target_name = context.dataset_info.target_names[0]
-    categorical_names = ['age', 'job', 'marital', 'education', 'default', 'housing', 'loan', 'y']
-
-    # read training dataset from Teradata and convert to pandas
-    train_df = DataFrame.from_query(context.dataset_info.sql)
-    train_pdf = train_df.to_pandas(all_rows=True)
-
-    # split data into X and y
-    X_train = train_pdf[feature_names]
-    y_train = train_pdf[target_name]
-
-    print("Starting training...")
 
     # read training dataset from Teradata and convert to pandas
     h2o.init()
-    train_df = DataFrame(data_conf["table"])
-    train_df = train_df.select([feature_names + [target_name]])
+    train_df = DataFrame.from_query(context.dataset_info.sql)
     train_pdf = train_df.to_pandas(all_rows=True)
     train_hdf = h2o.H2OFrame(train_pdf)
 
-    # split data into X and y and factorize
-    X_train, y_train = train_hdf.split_frame(ratios=[.7])
+    # split data into X and y
+    X_train = train_hdf
     X_train[target_name] = X_train[target_name].asfactor()
-    y_train[target_name] = y_train[target_name].asfactor()
 
     print("Starting training...")
 

@@ -1,46 +1,60 @@
-from teradataml import create_context
-from teradataml.dataframe.dataframe import DataFrame
-from teradataml.dataframe.copy_to import copy_to_sql
-from aoa.stats import stats
+from teradataml import copy_to_sql, DataFrame
+from aoa import (
+    record_scoring_stats,
+    aoa_create_context,
+    ModelContext
+)
 import os
 import h2o
 import pandas as pd
 
 
-def score(data_conf, model_conf, **kwargs):
+def score(context: ModelContext, **kwargs):
+    aoa_create_context()
+    
     current_path = os.path.abspath(os.getcwd())
-    input_path = "artifacts/input"
     h2o.init()
-    model = h2o.load_model(os.path.join(current_path, input_path, 'model.h2o'))
+    model = h2o.load_model(os.path.join(current_path, context.artifact_input_path, 'model.h2o'))
 
-    create_context(host=os.environ["AOA_CONN_HOST"],
-                   username=os.environ["AOA_CONN_USERNAME"],
-                   password=os.environ["AOA_CONN_PASSWORD"],
-                   database=data_conf["schema"] if "schema" in data_conf and data_conf["schema"] != "" else None)
-
-    feature_names = ['age', 'job', 'marital', 'education', 'default', 'balance', 'housing', 'loan']
-    target_name = 'y'
+    feature_names = context.dataset_info.feature_names
+    target_name = context.dataset_info.target_names[0]
+    entity_key = context.dataset_info.entity_key
 
     # read scoring dataset from Teradata and convert to pandas
-    features_tdf = DataFrame(data_conf["table"])
-    features_tdf = features_tdf.select([feature_names])
-    features_hdf = h2o.H2OFrame(features_tdf.to_pandas())
+    features_tdf = DataFrame.from_query(context.dataset_info.sql)
+    features_pdf = features_tdf.to_pandas(all_rows=True)
+    features_hdf = h2o.H2OFrame(features_pdf)
 
     print("Scoring")
-    y_pred = model.predict(features_hdf)
+    predictions_hdf = model.predict(features_hdf[feature_names])
 
     print("Finished Scoring")
 
     # create result dataframe and store in Teradata
-    y_pred_pd = y_pred.as_data_frame()
-    y_pred_tdf = y_pred_pd['predict']
-    y_pred_tdf = pd.DataFrame(y_pred_tdf, columns=['predict'])
-    y_pred_tdf = y_pred_tdf.rename(columns={'predict': target_name})
-    copy_to_sql(df=y_pred_tdf, table_name=data_conf["predictions"], index=False, if_exists="replace")
+    predictions_pdf = predictions_hdf.as_data_frame()
+    predictions_pdf = predictions_pdf.rename(columns={'predict': target_name})
+    predictions_pdf[entity_key] = features_pdf.index.values
+    predictions_pdf["job_id"] = context.job_id
+    predictions_pdf["json_report"] = ""
+    predictions_pdf = predictions_pdf[["job_id", entity_key, target_name, "json_report"]]
 
-    predictions_tdf = DataFrame(data_conf["predictions"])
+    copy_to_sql(df=predictions_pdf,
+                schema_name=context.dataset_info.predictions_database,
+                table_name=context.dataset_info.predictions_table,
+                index=False,
+                if_exists="append")
 
-    stats.record_scoring_stats(features_tdf, predictions_tdf)
+    print("Saved predictions in Teradata")
+
+    # calculate stats
+    predictions_df = DataFrame.from_query(f"""
+        SELECT 
+            * 
+        FROM {context.dataset_info.get_predictions_metadata_fqtn()} 
+            WHERE job_id = '{context.job_id}'
+    """)
+
+    record_scoring_stats(features_df=features_tdf, predicted_df=predictions_df, context=context)
 
 
 # Add code required for RESTful API
@@ -49,9 +63,8 @@ class ModelScorer(object):
     def __init__(self, config=None):
         print("Initializing RESTful Model...")
         current_path = os.path.abspath(os.getcwd())
-        input_path = "artifacts/input"
         h2o.init()
-        self.model = h2o.load_model(os.path.join(current_path, input_path, 'model.h2o'))
+        self.model = h2o.load_model(os.path.join(current_path, context.artifact_input_path, 'model.h2o'))
 
         print("The RESTful model ready to accept requests.")
 
@@ -62,14 +75,9 @@ class ModelScorer(object):
     def predict(self, data):
         print("Received prediction request with data: ")
         print(data)
-        feature_names = ['age', 'job', 'marital', 'education', 'default', 'balance', 'housing', 'loan']
+        feature_names = context.dataset_info.feature_names
         data_df = pd.DataFrame(data=[data], columns=feature_names)
         data_h2o = h2o.H2OFrame(data_df)
         pred = self.model.predict(data_h2o)
-
-        # record the predicted class so we can check model drift (via class distributions)
-        self.pred_class_counter.labels(model=os.environ["MODEL_NAME"],
-                                       version=os.environ.get("MODEL_VERSION", "1.0"),
-                                       clazz=str(int(1 if pred['predict'] == 'yes' else 0))).inc()
 
         return pred.as_data_frame()

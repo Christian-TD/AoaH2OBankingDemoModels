@@ -1,8 +1,12 @@
 from teradataml import create_context
 from teradataml.dataframe.dataframe import DataFrame
 from teradataml.dataframe.copy_to import copy_to_sql
-from aoa.stats import stats
-from aoa.util.artefacts import save_plot
+from aoa import (
+    record_evaluation_stats,
+    save_plot,
+    aoa_create_context,
+    ModelContext
+)
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import os
@@ -11,31 +15,25 @@ import h2o
 import pandas as pd
 
 
-def evaluate(data_conf, model_conf, **kwargs):
+def evaluate(context: ModelContext, **kwargs):
+
+    aoa_create_context()
+    
     current_path = os.path.abspath(os.getcwd())
-    input_path = "artifacts/input"
     h2o.init()
-    model = h2o.load_model(os.path.join(current_path, input_path, 'model.h2o'))
+    model = h2o.load_model(os.path.join(current_path, context.artifact_input_path, 'model.h2o'))
 
-    create_context(host=os.environ["AOA_CONN_HOST"],
-                   username=os.environ["AOA_CONN_USERNAME"],
-                   password=os.environ["AOA_CONN_PASSWORD"],
-                   database=data_conf["schema"] if "schema" in data_conf and data_conf["schema"] != "" else None)
-
-    feature_names = ['age', 'job', 'marital', 'education', 'default', 'balance', 'housing', 'loan']
-    target_name = 'y'
+    feature_names = context.dataset_info.feature_names
+    target_name = context.dataset_info.target_names[0]
 
     # read training dataset from Teradata and convert to pandas
-    test_df = DataFrame(data_conf["table"])
-    test_tdf = test_df.select([feature_names + [target_name]])
-    test_pdf = test_tdf.to_pandas()
+    test_df = DataFrame.from_query(context.dataset_info.sql)
+    test_pdf = test_df.to_pandas(all_rows=True)
     test_hdf = h2o.H2OFrame(test_pdf)
 
-    # split data into X and y and factorize
-    X_test, y_test = test_hdf.split_frame(ratios=[.7])
-    y_test = X_test
+    X_test = test_hdf[feature_names]
+    y_test = test_hdf
     y_test[target_name] = y_test[target_name].asfactor()
-    X_test = X_test[feature_names]
 
     print("Scoring")
     y_pred = model.predict(X_test)
@@ -61,9 +59,7 @@ def evaluate(data_conf, model_conf, **kwargs):
         'Recall': '{:.6f}'.format(eval_metrics.recall()[0][1])
     }
 
-    artifacts_path = "artifacts/output"
-
-    with open(os.path.join(current_path, artifacts_path, 'metrics.json'), "w+") as f:
+    with open(os.path.join(current_path, context.artifact_output_path, 'metrics.json'), "w+") as f:
         json.dump(evaluation, f)
 
     eval_metrics.plot(type="pr")
@@ -75,7 +71,7 @@ def evaluate(data_conf, model_conf, **kwargs):
     model.learning_curve_plot()
     save_plot('Learning Curve')
 
-    cm = confusion_matrix(y_test.as_data_frame()['y'].values, y_pred_tdf.values)
+    cm = confusion_matrix(y_test.as_data_frame()[target_name].values, y_pred_tdf.values)
     labels = ['no', 'yes']
     values = [0,1]
     fig = plt.figure()
@@ -101,7 +97,12 @@ def evaluate(data_conf, model_conf, **kwargs):
     fis = fix.to_dict('records')
     feature_importance = {v['variable']: v['scaled_importance'] for (k, v) in enumerate(fis)}
 
-    predictions_table = "{}_tmp".format(data_conf["predictions"]).lower()
+    predictions_table = "evaluation_preds_tmp"
     copy_to_sql(df=y_pred_tdf, table_name=predictions_table, index=False, if_exists="replace", temporary=True)
 
-    stats.record_evaluation_stats(test_tdf.iloc[:len(y_pred_tdf)], DataFrame(predictions_table), feature_importance)
+    #stats.record_evaluation_stats(test_tdf.iloc[:len(y_pred_tdf)], DataFrame(predictions_table), feature_importance)
+
+    record_evaluation_stats(features_df=test_df,
+                        predicted_df=DataFrame.from_query(f"SELECT * FROM {predictions_table}"),
+                        importance=feature_importance,
+                        context=context)
